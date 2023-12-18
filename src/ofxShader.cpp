@@ -397,7 +397,17 @@ bool ofxShader::_filesChanged() {
 
 std::time_t ofxShader::_getLastModified( ofFile& _file ) {
     if ( _file.exists() ) {
+        // Changed according to this:
+        /*
+            https://en.cppreference.com/w/cpp/filesystem/directory_entry/last_write_time
+        */
+        #ifdef TARGET_LINUX
+        // code here
+        std::filesystem::file_time_type ftime = std::filesystem::last_write_time(_file.path());
+        return std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(ftime));
+        #else
         return std::filesystem::last_write_time(_file.path());
+        #endif        
     }
     else {
         return 0;
